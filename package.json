@@ -2,7 +2,7 @@
   "name": "vitalis",
   "version": "1.0.0",
   "private": true,
-  "description": "Vitalis — лендинг, форма заявок и прокси к AI-бэкенду",
+  "description": "Vitalis — там где жизнь встречается с вечностью",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
