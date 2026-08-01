@@ -1,0 +1,21 @@
+{
+  "name": "vitalis",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vitalis — лендинг, форма заявок и прокси к AI-бэкенду",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "http-proxy-middleware": "^3.0.3",
+    "nodemailer": "^6.9.16"
+  }
+}

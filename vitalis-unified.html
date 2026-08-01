@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vitalis — AI-платформа клинических протоколов для врачей и студентов</title>
+<meta name="description" content="Vitalis объединяет клинические рекомендации РФ, международные протоколы, поиск по PubMed и генерацию медицинских статей в единой AI-платформе. 152-ФЗ.">
+<meta property="og:title" content="Vitalis — там, где жизнь встречает вечность">
+<meta property="og:description" content="AI-платформа клинических протоколов. РФ + международные рекомендации. PubMed, Medscape, ESC, AHA. 152-ФЗ.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230A1628'/><path d='M10 22L16 10L22 22' fill='none' stroke='%2310B981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/><circle cx='16' cy='22' r='2' fill='%2310B981'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0A1628;--navy-mid:#0F1D32;--navy-light:#162640;
+  --slate:#64748B;--slate-light:#94A3B8;
+  --em:#10B981;--em-deep:#059669;--em-soft:rgba(16,185,129,0.08);
+  --ice:#F0F9FF;--paper:#FAFBFD;--white:#FFF;
+  --amber:#F59E0B;--coral:#EF4444;--blue:#3B82F6;--purple:#A855F7;--obsidian:#7C3AED;
+  --line:rgba(10,22,40,0.08);--line-l:rgba(255,255,255,0.08);
+  --r:16px;--shadow:0 12px 40px rgba(10,22,40,0.10);
+  --dp:'Playfair Display',Georgia,serif;
+  --bd:'Inter',-apple-system,sans-serif;
+  --mn:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--bd);color:var(--navy);background:var(--paper);line-height:1.6;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px;}
+section{padding:96px 0;}
+@media(max-width:768px){section{padding:64px 0;}}
+h1,h2,h3{font-family:var(--dp);font-weight:700;letter-spacing:-0.01em;}
+h2{font-size:clamp(28px,3.8vw,42px);line-height:1.12;}
+h3{font-size:20px;line-height:1.25;}
+.ey{display:inline-flex;align-items:center;gap:8px;font-family:var(--mn);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--em);font-weight:500;margin-bottom:16px;}
+.ey::before{content:"";width:24px;height:1.5px;background:currentColor;display:inline-block;}
+.sh{max-width:640px;margin-bottom:56px;}
+.sh p{color:var(--slate);margin-top:14px;font-size:16.5px;}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .55s ease,transform .55s ease;}
+.rv.vis{opacity:1;transform:translateY(0);}
+.rv-1{transition-delay:.1s;}.rv-2{transition-delay:.2s;}.rv-3{transition-delay:.3s;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 26px;border-radius:999px;font-weight:600;font-size:14.5px;cursor:pointer;border:none;white-space:nowrap;transition:transform .15s,box-shadow .15s;font-family:var(--bd);}
+.btn:hover{transform:translateY(-1px);}
+.btn-em{background:var(--em);color:#fff;box-shadow:0 6px 20px rgba(16,185,129,0.30);}
+.btn-em:hover{background:var(--em-deep);}
+.btn-ol{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.25);}
+.btn-dk{background:var(--navy);color:#fff;}
+.btn-gh{background:transparent;color:var(--navy);border:1.5px solid var(--line);}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:50;background:rgba(250,251,253,0.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;max-width:1100px;margin:0 auto;}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--dp);font-weight:800;font-size:20px;}
+.lm{width:30px;height:30px;border-radius:8px;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.lm svg{width:18px;height:18px;}
+nav.nl{display:flex;gap:28px;font-size:14px;font-weight:500;color:var(--slate);}
+nav.nl a:hover{color:var(--navy);}
+.burger{display:none;background:none;border:none;cursor:pointer;padding:8px;flex-direction:column;gap:5px;}
+.burger span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;}
+@media(max-width:900px){nav.nl{display:none;}.burger{display:flex;}}
+.mm{display:none;position:fixed;inset:0;z-index:100;background:rgba(250,251,253,0.97);backdrop-filter:blur(12px);flex-direction:column;align-items:center;justify-content:center;gap:24px;}
+.mm.open{display:flex;}
+.mm a{font-size:18px;font-weight:600;color:var(--navy);}
+.mm-c{position:absolute;top:20px;right:24px;background:none;border:none;font-size:28px;cursor:pointer;color:var(--navy);}
+
+/* HERO */
+.hero{background:var(--navy);color:#fff;padding:84px 0 76px;position:relative;overflow:hidden;}
+.hero::before{content:"";position:absolute;top:-40%;right:-10%;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,0.12) 0%,transparent 70%);pointer-events:none;}
+.hero-g{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+@media(max-width:920px){.hero-g{grid-template-columns:1fr;}}
+.hero h1{font-size:clamp(36px,5.2vw,56px);line-height:1.06;font-weight:800;}
+.hero h1 em{font-style:italic;color:var(--em);}
+.hero-sub{margin-top:20px;font-size:17px;color:var(--slate-light);max-width:540px;line-height:1.65;}
+.hero-badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px;}
+.hero-badge{font-family:var(--mn);font-size:11px;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);color:var(--slate-light);}
+.hero-badge b{color:var(--em);}
+.hero-act{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap;}
+
+/* FLOW */
+.fc{background:var(--navy-mid);border:1px solid var(--line-l);border-radius:20px;padding:24px;font-family:var(--mn);font-size:12px;color:var(--slate-light);}
+.fc-t{font-family:var(--bd);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--em);margin-bottom:18px;font-weight:600;}
+.fc-r{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.fc-r:last-child{margin-bottom:0;}
+.fn{padding:9px 12px;border-radius:9px;font-size:11.5px;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.fn-d{background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.1);}
+.fn-g{background:rgba(59,130,246,0.15);color:#93C5FD;border:1px solid rgba(59,130,246,0.25);}
+.fn-c{background:var(--em-soft);color:var(--em);border:1px solid rgba(16,185,129,0.3);}
+.fn-cl{background:rgba(168,85,247,0.12);color:#C4B5FD;border:1px solid rgba(168,85,247,0.25);}
+.fn-ob{background:rgba(124,58,237,0.12);color:#C4B5FD;border:1px solid rgba(124,58,237,0.25);}
+.fa{color:var(--slate);font-size:13px;flex-shrink:0;}
+.fb{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:600;margin-top:14px;background:rgba(16,185,129,0.12);color:var(--em);border:1px solid rgba(16,185,129,0.3);}
+
+/* CAPABILITIES (3 from MediSynapse) */
+.cap-g{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+@media(max-width:880px){.cap-g{grid-template-columns:1fr;}}
+.cap{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:30px 26px;display:flex;flex-direction:column;gap:14px;transition:box-shadow .2s,transform .2s;}
+.cap:hover{box-shadow:var(--shadow);transform:translateY(-3px);}
+.cap-ic{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.cap:nth-child(1) .cap-ic{background:rgba(59,130,246,0.08);}
+.cap:nth-child(2) .cap-ic{background:var(--em-soft);}
+.cap:nth-child(3) .cap-ic{background:rgba(168,85,247,0.08);}
+.cap p.desc{color:var(--slate);font-size:14.8px;}
+.cap-ex{margin-top:auto;padding-top:14px;border-top:1px dashed var(--line);font-family:var(--mn);font-size:12.5px;color:var(--navy);opacity:.7;}
+.cap-ex::before{content:"\201C";}.cap-ex::after{content:"\201D";}
+
+/* HOW — problem→solution + steps */
+.how-sec{background:var(--ice);}
+.ps-row{display:grid;grid-template-columns:40px 1fr 40px 1fr;gap:0 20px;align-items:start;padding:24px 0;border-bottom:1px solid var(--line);}
+.ps-row:last-child{border-bottom:none;}
+@media(max-width:760px){.ps-row{grid-template-columns:32px 1fr;gap:6px 12px;}}
+.ps-ic{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;}
+.ps-ic.bad{background:rgba(239,68,68,0.08);color:var(--coral);}
+.ps-ic.ok{background:var(--em-soft);color:var(--em);}
+.ps-t h4{font-family:var(--bd);font-size:15px;font-weight:700;margin-bottom:3px;}
+.ps-t p{font-size:14px;color:var(--slate);}
+.ps-ar{display:flex;align-items:center;justify-content:center;color:var(--slate-light);font-size:18px;align-self:center;}
+@media(max-width:760px){.ps-ar{display:none;}}
+
+/* STEPS */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;}
+@media(max-width:820px){.steps{grid-template-columns:1fr;}}
+.stp{text-align:center;padding:28px 20px;position:relative;}
+.stp-n{width:48px;height:48px;border-radius:14px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-family:var(--mn);font-weight:700;font-size:18px;}
+.stp:nth-child(1) .stp-n{background:rgba(59,130,246,0.1);color:var(--blue);}
+.stp:nth-child(2) .stp-n{background:var(--em-soft);color:var(--em);}
+.stp:nth-child(3) .stp-n{background:rgba(168,85,247,0.1);color:var(--purple);}
+.stp h3{font-size:17px;margin-bottom:6px;}
+.stp p{font-size:14px;color:var(--slate);}
+.stp-con{position:absolute;top:52px;right:-12px;width:24px;height:2px;background:var(--line);}
+@media(max-width:820px){.stp-con{display:none;}}
+.stp:last-child .stp-con{display:none;}
+
+/* PROTOCOL CARD */
+.proto-sec{background:var(--ice);}
+.pw{max-width:780px;margin:0 auto;}
+.pc{background:var(--white);border-radius:20px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden;}
+.pc-h{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--line);background:#FBFCFE;}
+.pc-d{display:flex;align-items:center;gap:12px;}
+.mkb{font-family:var(--mn);font-size:11px;padding:4px 10px;border-radius:6px;background:var(--navy);color:#fff;font-weight:500;}
+.pc-a{display:flex;gap:8px;}
+.pc-a button{background:none;border:1px solid var(--line);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--slate);transition:border-color .2s,color .2s;}
+.pc-a button:hover{border-color:var(--navy);color:var(--navy);}
+.pt{display:flex;border-bottom:1px solid var(--line);background:#FBFCFE;}
+.pt-b{flex:1;padding:13px 18px;font-size:13px;font-weight:600;background:none;border:none;cursor:pointer;color:var(--slate);border-bottom:2.5px solid transparent;transition:color .2s,border-color .2s;font-family:var(--bd);display:flex;align-items:center;justify-content:center;gap:7px;}
+.pt-b.active{color:var(--navy);border-bottom-color:var(--em);}
+.pt-b .td{width:7px;height:7px;border-radius:50%;}
+.pt-b:nth-child(1) .td{background:var(--blue);}
+.pt-b:nth-child(2) .td{background:var(--purple);}
+.pb{padding:24px;position:relative;overflow:hidden;min-height:280px;}
+.pane{display:none;animation:pIn .35s ease;}
+.pane.active{display:block;}
+@keyframes pIn{from{opacity:0;transform:translateX(12px);}to{opacity:1;transform:translateX(0);}}
+/* RF algo */
+.af{display:flex;flex-direction:column;}
+.as{display:flex;gap:14px;position:relative;padding:10px 10px 20px;cursor:pointer;border-radius:12px;transition:background .2s;}
+.as:hover{background:var(--ice);}
+.as:last-child{padding-bottom:10px;}
+.as::before{content:"";position:absolute;left:25px;top:44px;bottom:0;width:2px;background:var(--line);}
+.as:last-child::before{display:none;}
+.ad{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;transition:transform .2s,box-shadow .2s;}
+.as:hover .ad{transform:scale(1.15);box-shadow:0 4px 14px rgba(0,0,0,0.15);}
+.ad-d{background:var(--blue);}.ad-l{background:var(--em);}.ad-r{background:var(--purple);}
+.ac h4{font-size:14px;font-weight:700;margin-bottom:3px;}
+.ac p{font-size:13px;color:var(--slate);}
+.adtl{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.as.exp .adtl{max-height:200px;margin-top:6px;}
+.dl{display:flex;gap:7px;flex-wrap:wrap;}
+.dr{font-family:var(--mn);font-size:11px;padding:4px 9px;border-radius:7px;background:var(--ice);border:1px solid var(--line);color:var(--navy);}
+.ev{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 14px;border-radius:10px;background:var(--em-soft);border:1px solid rgba(16,185,129,0.15);}
+.ev .el{font-family:var(--mn);font-size:10.5px;color:var(--em-deep);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.ev .evl{font-size:13px;font-weight:600;color:var(--navy);}
+.sr{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--ice);border:1px solid var(--line);font-family:var(--mn);font-size:12px;color:var(--slate);}
+.sr b{color:var(--navy);}
+/* INTL pane */
+.sa{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;background:rgba(168,85,247,0.05);border:1px dashed rgba(168,85,247,0.2);margin-bottom:16px;}
+.sa .pl{width:10px;height:10px;border-radius:50%;background:var(--purple);animation:pls 1.5s ease infinite;}
+@keyframes pls{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+.sa span{font-family:var(--mn);font-size:12px;color:var(--purple);}
+.sa.done{border-color:rgba(16,185,129,0.3);background:var(--em-soft);}
+.sa.done .pl{background:var(--em);animation:none;}
+.sa.done span{color:var(--em-deep);}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+@media(max-width:600px){.cg{grid-template-columns:1fr;}}
+.cc{padding:14px 16px;border-radius:12px;border:1px solid var(--line);opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s;}
+.cc.show{opacity:1;transform:translateY(0);}
+.cc .co{font-family:var(--mn);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--purple);margin-bottom:6px;font-weight:600;}
+.cc h4{font-size:13.5px;font-weight:700;margin-bottom:5px;}
+.cc p{font-size:12.5px;color:var(--slate);}
+.db{padding:14px 16px;border-radius:12px;border:1px dashed rgba(168,85,247,0.3);background:rgba(168,85,247,0.04);opacity:0;transform:translateY(10px);transition:opacity .4s .3s,transform .4s .3s;}
+.db.show{opacity:1;transform:translateY(0);}
+.db .dbl{font-family:var(--mn);font-size:10.5px;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600;}
+.db p{font-size:13px;color:var(--slate);}
+.pmr{display:flex;flex-direction:column;gap:7px;margin-top:12px;}
+.pm{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;border-radius:8px;background:var(--ice);border:1px solid var(--line);font-family:var(--mn);font-size:11px;color:var(--slate);opacity:0;transition:opacity .3s;}
+.pm.show{opacity:1;}
+.pm b{color:var(--purple);}
+.ob-b{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--em-soft);border:1px solid rgba(16,185,129,0.2);font-size:10.5px;color:var(--em-deep);font-weight:600;margin-top:12px;font-family:var(--mn);width:fit-content;}
+
+/* PERSONAS */
+.per-g{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media(max-width:920px){.per-g{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.per-g{grid-template-columns:1fr;}}
+.per{padding:24px 20px;border-radius:var(--r);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px;transition:box-shadow .2s,transform .2s;}
+.per:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
+.per .pi{font-size:26px;}
+.per h4{font-size:15px;font-weight:700;}
+.per p{font-size:13.5px;color:var(--slate);}
+
+/* OBSIDIAN KNOWLEDGE ARCHITECTURE */
+.obs-sec{background:var(--navy);color:#fff;position:relative;overflow:hidden;}
+.obs-sec::after{content:"";position:absolute;bottom:-30%;left:-8%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.1) 0%,transparent 70%);pointer-events:none;}
+.obs-g{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;}
+@media(max-width:880px){.obs-g{grid-template-columns:1fr;}}
+.obs-flow{display:flex;flex-direction:column;gap:0;}
+.obs-node{display:flex;gap:14px;position:relative;padding-bottom:24px;}
+.obs-node:last-child{padding-bottom:0;}
+.obs-node::before{content:"";position:absolute;left:18px;top:42px;bottom:0;width:2px;background:var(--line-l);}
+.obs-node:last-child::before{display:none;}
+.obs-dot{width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.obs-dot.vault{background:rgba(124,58,237,0.2);border:1px solid rgba(124,58,237,0.4);}
+.obs-dot.rag{background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);}
+.obs-dot.ai{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);}
+.obs-dot.pub{background:var(--em-soft);border:1px solid rgba(16,185,129,0.3);}
+.obs-info h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:3px;}
+.obs-info p{font-size:13px;color:var(--slate-light);}
+.obs-info .tag{font-family:var(--mn);font-size:10px;padding:3px 8px;border-radius:6px;display:inline-block;margin-top:6px;}
+.obs-info .tag-ob{background:rgba(124,58,237,0.15);color:#C4B5FD;}
+.obs-info .tag-lc{background:rgba(245,158,11,0.15);color:#FCD34D;}
+.obs-info .tag-gc{background:rgba(59,130,246,0.15);color:#93C5FD;}
+.obs-info .tag-em{background:rgba(16,185,129,0.15);color:#6EE7B7;}
+.obs-cards{display:flex;flex-direction:column;gap:14px;}
+.obs-card{background:var(--navy-light);border:1px solid var(--line-l);border-radius:14px;padding:20px;}
+.obs-card .oc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.obs-card .oc-head h4{font-size:14px;font-weight:700;color:#fff;}
+.obs-card .oc-head .oc-tag{font-family:var(--mn);font-size:10px;padding:3px 8px;border-radius:6px;}
+.obs-card p{font-size:13px;color:var(--slate-light);}
+.obs-card ul{margin:8px 0 0;list-style:none;display:flex;flex-direction:column;gap:6px;}
+.obs-card li{font-size:12.5px;color:var(--slate-light);display:flex;gap:6px;}
+.obs-card li::before{content:"→";color:var(--obsidian);flex-shrink:0;}
+
+/* PRICING */
+.pricing{background:var(--ice);}
+.pr-g{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+@media(max-width:1000px){.pr-g{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.pr-g{grid-template-columns:1fr;}}
+.prc{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:28px 22px;display:flex;flex-direction:column;transition:box-shadow .2s,transform .2s;}
+.prc:hover{box-shadow:var(--shadow);transform:translateY(-3px);}
+.prc.feat{border:2px solid var(--em);position:relative;}
+.prc.feat::after{content:"Популярный";position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--em);color:#fff;font-size:10px;font-weight:700;padding:3px 12px;border-radius:999px;letter-spacing:.03em;}
+.pr-tier{font-family:var(--mn);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;font-weight:600;}
+.prc:nth-child(1) .pr-tier{color:var(--blue);}
+.prc:nth-child(2) .pr-tier{color:var(--em);}
+.prc:nth-child(3) .pr-tier{color:var(--purple);}
+.prc:nth-child(4) .pr-tier{color:var(--amber);}
+.pr-name{font-family:var(--dp);font-size:20px;font-weight:700;margin-bottom:4px;}
+.pr-price{font-size:28px;font-weight:800;margin-bottom:4px;}
+.pr-price small{font-size:14px;font-weight:500;color:var(--slate);}
+.pr-desc{font-size:13px;color:var(--slate);margin-bottom:20px;}
+.pr-ft{list-style:none;display:flex;flex-direction:column;gap:9px;flex-grow:1;margin-bottom:20px;}
+.pr-ft li{display:flex;gap:7px;font-size:13px;color:var(--navy);}
+.pr-ft li::before{content:"✓";color:var(--em);font-weight:700;flex-shrink:0;}
+.prc .btn{width:100%;margin-top:auto;font-size:13.5px;padding:11px 20px;}
+
+/* ROADMAP */
+.rm-sec{background:var(--navy);color:#fff;}
+.rm-tl{position:relative;padding-left:32px;}
+.rm-tl::before{content:"";position:absolute;left:11px;top:6px;bottom:6px;width:2px;background:var(--line-l);}
+.rm-i{position:relative;padding-bottom:32px;}
+.rm-i:last-child{padding-bottom:0;}
+.rm-d{position:absolute;left:-32px;top:2px;width:22px;height:22px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;}
+.rm-d::after{content:"";width:8px;height:8px;border-radius:50%;}
+.rm-i.done .rm-d{border-color:var(--em);}.rm-i.done .rm-d::after{background:var(--em);}
+.rm-i.now .rm-d{border-color:var(--amber);animation:rmP 2s ease infinite;}.rm-i.now .rm-d::after{background:var(--amber);}
+@keyframes rmP{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.3);}50%{box-shadow:0 0 0 8px rgba(245,158,11,0);}}
+.rm-i.fut .rm-d{border-color:var(--slate);}.rm-i.fut .rm-d::after{background:var(--slate);}
+.rm-dt{font-family:var(--mn);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;}
+.rm-i.done .rm-dt{color:#6EE7B7;}.rm-i.now .rm-dt{color:#FCD34D;}.rm-i.fut .rm-dt{color:var(--slate);}
+.rm-i h4{font-size:15px;font-weight:700;color:#fff;margin-bottom:3px;}
+.rm-i p{font-size:13px;color:var(--slate-light);}
+
+/* TRUST */
+.tr-g{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media(max-width:820px){.tr-g{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.tr-g{grid-template-columns:1fr;}}
+.tr-i{padding:22px 18px;border-radius:var(--r);background:var(--em-soft);border:1px solid rgba(16,185,129,0.12);text-align:center;}
+.tr-i .tii{font-size:26px;margin-bottom:8px;display:block;}
+.tr-i p{font-size:13.5px;font-weight:600;color:var(--navy);}
+.tr-i span{font-size:12px;color:var(--slate);display:block;margin-top:3px;}
+
+/* SOURCES */
+.src-g{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:820px){.src-g{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.src-g{grid-template-columns:1fr;}}
+.src-c{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fff;}
+.src-c b{font-size:14px;display:block;margin-bottom:3px;}
+.src-c span{font-size:12.5px;color:var(--slate);}
+
+/* FAQ */
+.faq-i{border-bottom:1px solid var(--line);}
+.faq-q{width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:18px 0;display:flex;justify-content:space-between;align-items:center;font-size:15.5px;font-weight:600;color:var(--navy);font-family:var(--bd);}
+.faq-q .plus{font-size:20px;color:var(--em);transition:transform .2s;flex-shrink:0;margin-left:14px;}
+.faq-i.open .plus{transform:rotate(45deg);}
+.faq-an{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+.faq-an p{padding-bottom:18px;color:var(--slate);font-size:14px;max-width:740px;}
+
+/* CTA */
+.cta-sec{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);color:#fff;text-align:center;}
+.cta-sec h2{color:#fff;}
+.cta-sec>div>p{color:var(--slate-light);margin-top:10px;font-size:16px;}
+.fi{max-width:480px;margin:32px auto 0;background:var(--navy-light);border:1px solid var(--line-l);border-radius:18px;padding:26px;text-align:left;}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--slate-light);}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line-l);border-radius:9px;background:rgba(255,255,255,0.04);color:#fff;font-family:var(--bd);font-size:13.5px;outline:none;transition:border-color .2s;}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--slate);}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--em);}
+.fg select{-webkit-appearance:none;appearance:none;}
+.fg select option{background:var(--navy);color:#fff;}
+.fg textarea{resize:vertical;min-height:70px;}
+.fg .err{color:var(--coral);font-size:11.5px;margin-top:3px;display:none;}
+.fg.he input,.fg.he select,.fg.he textarea{border-color:var(--coral);}
+.fg.he .err{display:block;}
+.fok{display:none;text-align:center;padding:28px 14px;}
+.fok .okc{width:48px;height:48px;border-radius:50%;background:var(--em-soft);color:var(--em);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px;}
+.fok h3{color:#fff;font-size:18px;}
+.fok p{color:var(--slate-light);margin-top:5px;font-size:13px;}
+
+/* DISCLAIMER */
+.disc{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:14px;padding:18px 20px;display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#7A4E06;margin-top:24px;}
+.disc b{color:#5C3A02;}
+
+/* FOOTER */
+footer{background:var(--navy);color:var(--slate-light);padding:56px 0 28px;border-top:1px solid var(--line-l);}
+.ft-g{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:32px;}
+@media(max-width:820px){.ft-g{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.ft-g{grid-template-columns:1fr;}}
+footer h5{color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+footer ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+footer a{color:var(--slate-light);font-size:13px;}
+footer a:hover{color:#fff;}
+.ft-logo{display:flex;align-items:center;gap:10px;color:#fff;font-family:var(--dp);font-weight:800;font-size:18px;margin-bottom:8px;}
+.ft-bot{border-top:1px solid var(--line-l);margin-top:36px;padding-top:18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:12px;}
+
+.btt{position:fixed;bottom:24px;right:24px;z-index:40;width:42px;height:42px;border-radius:50%;background:var(--navy);color:var(--em);display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(16,185,129,0.3);cursor:pointer;font-size:17px;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;box-shadow:0 6px 20px rgba(10,22,40,0.3);}
+.btt.show{opacity:1;transform:translateY(0);}
+::selection{background:var(--em);color:#fff;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="#" class="logo"><span class="lm"><svg viewBox="0 0 18 18" fill="none"><path d="M4 14L9 4L14 14" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="14" r="1.5" fill="#10B981"/></svg></span>Vitalis</a>
+    <nav class="nl">
+      <a href="#cap">Возможности</a><a href="#how">Как работает</a><a href="#card">Карточка</a><a href="#obs">Архитектура знаний</a><a href="#pricing">Тарифы</a><a href="#faq">FAQ</a>
+    </nav>
+    <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    <a href="#demo" class="btn btn-em" style="display:none" id="hcta">Начать</a>
+  </div>
+</header>
+<div class="mm" id="mm"><button class="mm-c" id="mmc">&times;</button><a href="#cap" class="ml">Возможности</a><a href="#how" class="ml">Как работает</a><a href="#card" class="ml">Карточка</a><a href="#obs" class="ml">Архитектура</a><a href="#pricing" class="ml">Тарифы</a><a href="#faq" class="ml">FAQ</a><a href="#demo" class="btn btn-em ml">Начать</a></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-g">
+    <div>
+      <div class="ey rv" style="color:var(--em);">AI-платформа для врачей и студентов</div>
+      <h1 class="rv">Vitalis<br><em>Там, где жизнь встречает вечность</em></h1>
+      <p class="hero-sub rv rv-1">Единая платформа: клинические протоколы РФ, международные рекомендации ESC/AHA, поиск по PubMed, генерация медицинских статей и агрегация источников — с AI-ассистентом и полным соблюдением 152-ФЗ.</p>
+      <div class="hero-badges rv rv-1">
+        <span class="hero-badge"><b>GigaChat</b> · РФ-протоколы</span>
+        <span class="hero-badge"><b>Claude</b> · Международные</span>
+        <span class="hero-badge"><b>Obsidian</b> · База знаний</span>
+        <span class="hero-badge">🔒 152-ФЗ</span>
+      </div>
+      <div class="hero-act rv rv-2">
+        <a href="#demo" class="btn btn-em">Начать бесплатно</a>
+        <a href="#card" class="btn btn-ol">Посмотреть карточку</a>
+      </div>
+    </div>
+    <div class="rv rv-1">
+      <div class="fc">
+        <div class="fc-t">Архитектура Vitalis</div>
+        <div class="fc-r"><span class="fn fn-ob">📓 Obsidian Vault</span><span class="fa">→</span><span class="fn fn-g">FAISS · RAG</span></div>
+        <div class="fc-r"><span class="fn fn-d">👨‍⚕️ Врач</span><span class="fa">→</span><span class="fn fn-g">GigaChat · РФ</span><span class="fa">→</span><span class="fn fn-c">📋 Карточка</span></div>
+        <div class="fc-r"><span style="width:120px"></span><span class="fn fn-c">📋 Карточка</span><span class="fa">⇄</span><span class="fn fn-cl">Claude · Мир</span></div>
+        <div class="fb">🔒 Обезличенный запрос · без ПД · 152-ФЗ</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAPABILITIES -->
+<section id="cap">
+  <div class="wrap">
+    <div class="sh rv"><span class="ey">Возможности</span><h2>Три режима работы в одной платформе</h2><p>Всё, что раньше требовало десятков вкладок и часов поиска — в одном окне.</p></div>
+    <div class="cap-g">
+      <div class="cap rv"><div class="cap-ic">🩺</div><h3>Клинические ответы</h3><p class="desc">Задайте вопрос о симптомах, первой линии терапии или стандартах лечения. Vitalis проанализирует внутреннюю базу и найдёт данные в PubMed, Medscape, Mayo Clinic и клинических рекомендациях РФ.</p><div class="cap-ex">Первая линия терапии артериальной гипертензии у пациентов старше 65 лет?</div></div>
+      <div class="cap rv rv-1"><div class="cap-ic">📝</div><h3>Генерация медицинских статей</h3><p class="desc">Готовитесь к экзамену или пишете обзор? Vitalis генерирует структурированные статьи на основе проверенных источников — с готовым списком литературы и PMID.</p><div class="cap-ex">Обзор современных подходов к лечению сахарного диабета 2 типа</div></div>
+      <div class="cap rv rv-2"><div class="cap-ic">🔗</div><h3>Агрегация источников</h3><p class="desc">Больше не нужно открывать десятки вкладок. Vitalis агрегирует ссылки из PubMed, Medscape, Mayo Clinic, Cochrane и национальных рекомендаций — всё в одном ответе.</p><div class="cap-ex">Подбери источники по диагностике бронхиальной астмы у детей</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-sec" id="how">
+  <div class="wrap">
+    <div class="sh rv"><span class="ey">Как это работает</span><h2>Проблема → Решение → Три шага</h2></div>
+    <div class="rv">
+      <div class="ps-row"><div class="ps-ic bad">✕</div><div class="ps-t"><h4>Протокол — сотни страниц</h4><p>Сложно быстро найти нужный раздел среди документов Минздрава</p></div><div class="ps-ar">→</div><div class="ps-t"><h4 style="color:var(--em)">Карточка с выжимкой за секунды</h4><p>Алгоритм, препараты, дозировки, ссылка на источник</p></div></div>
+      <div class="ps-row"><div class="ps-ic bad">✕</div><div class="ps-t"><h4>РФ и ESC/AHA — разные окна</h4><p>Нет единого интерфейса для сравнения протоколов</p></div><div class="ps-ar">→</div><div class="ps-t"><h4 style="color:var(--em)">Две вкладки в одной карточке</h4><p>GigaChat — РФ, Claude — ESC, AHA, PubMed</p></div></div>
+      <div class="ps-row"><div class="ps-ic bad">✕</div><div class="ps-t"><h4>Зарубежные AI — риск 152-ФЗ</h4><p>Передача ПД пациентов за рубеж</p></div><div class="ps-ar">→</div><div class="ps-t"><h4 style="color:var(--em)">Обезличивание на уровне архитектуры</h4><p>Claude получает только клиническую задачу, без ПД</p></div></div>
+    </div>
+    <div class="steps rv">
+      <div class="stp"><div class="stp-n">1</div><h3>Врач задаёт вопрос</h3><p>Диагноз, симптом или код МКБ-10. Запрос в российском контуре.</p><span class="stp-con"></span></div>
+      <div class="stp"><div class="stp-n">2</div><h3>GigaChat + Obsidian Vault</h3><p>RAG-поиск по базе протоколов. Карточка с алгоритмом и препаратами.</p><span class="stp-con"></span></div>
+      <div class="stp"><div class="stp-n">3</div><h3>Усилитель Claude</h3><p>Обезличенный запрос → сравнение с ESC, AHA, PubMed → дополнительная вкладка.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROTOCOL CARD -->
+<section class="proto-sec" id="card">
+  <div class="wrap">
+    <div class="sh rv" style="text-align:center;margin-left:auto;margin-right:auto;"><span class="ey">Интерактивная карточка</span><h2>Протокол в действии</h2><p>Нажимайте на шаги алгоритма и переключайте вкладки.</p></div>
+    <div class="pw rv">
+      <div class="pc">
+        <div class="pc-h"><div class="pc-d"><span class="mkb">I21</span><h3>Острый коронарный синдром</h3></div><div class="pc-a"><button title="Скачать">⬇</button><button title="Избранное">☆</button><button title="Поделиться">↗</button></div></div>
+        <div class="pt">
+          <button class="pt-b active" data-tab="rf"><span class="td"></span>РФ-рекомендации</button>
+          <button class="pt-b" data-tab="intl"><span class="td"></span>Международные</button>
+        </div>
+        <div class="pb">
+          <div class="pane active" id="pane-rf">
+            <div class="af">
+              <div class="as exp" data-expand><div class="ad ad-d">Д</div><div class="ac"><h4>Диагностика</h4><p>ЭКГ ≤ 10 мин, тропонин I/T × 2, ЭхоКГ</p><div class="adtl"><div class="dl"><span class="dr">ЭКГ ≤ 10 мин</span><span class="dr">Тропонин × 2</span><span class="dr">ЭхоКГ</span><span class="dr">КАГ</span></div></div></div></div>
+              <div class="as" data-expand><div class="ad ad-l">Л</div><div class="ac"><h4>Лечение (первая линия)</h4><p>ДААТ, антикоагуляция, реваскуляризация</p><div class="adtl"><div class="dl"><span class="dr">АСК 150–300</span><span class="dr">Клопидогрел 600</span><span class="dr">Гепарин в/в</span><span class="dr">Нитраты</span><span class="dr">β-блокаторы</span></div></div></div></div>
+              <div class="as" data-expand><div class="ad ad-r">Р</div><div class="ac"><h4>Реабилитация</h4><p>Мобилизация, профилактика, контроль рисков</p><div class="adtl"><div class="dl"><span class="dr">Статины</span><span class="dr">иАПФ</span><span class="dr">Кардиореабилитация II–III</span></div></div></div></div>
+            </div>
+            <div class="ev"><span class="el">Доказательность</span><span class="evl">I A — сильная рекомендация</span></div>
+            <div class="sr"><b>Источник:</b> Клинические рекомендации Минздрава РФ «ОКС без подъёма ST», 2024</div>
+          </div>
+          <div class="pane" id="pane-intl">
+            <div class="sa" id="sa"><div class="pl"></div><span>Анализ международных протоколов…</span></div>
+            <div class="cg"><div class="cc" id="c1"><div class="co">ESC · Европа</div><h4>ESC 2023</h4><p>Прасугрел/тикагрелор вместо клопидогрела. Инвазивная стратегия ≤ 24 ч.</p></div><div class="cc" id="c2"><div class="co">AHA · США</div><h4>AHA 2023</h4><p>Тикагрелор как P2Y12 первого выбора. Ранняя инвазивная при GRACE > 140.</p></div></div>
+            <div class="db" id="db"><div class="dbl">Отличия от РФ</div><p>В РФ клопидогрел — первый выбор (доступность). ESC/AHA предпочитают прасугрел/тикагрелор. Сроки инвазивной стратегии различаются.</p></div>
+            <div class="pmr"><div class="pm" id="p1"><span>Collet et al. ESC NSTE-ACS</span><b>PMID 32860058</b></div><div class="pm" id="p2"><span>AHA/ACC Guideline 2023</span><b>PMID 37634509</b></div><div class="pm" id="p3"><span>PLATO Trial</span><b>PMID 19717846</b></div></div>
+            <div class="ob-b">🔒 Обезличенный запрос · без ПД</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOR WHOM -->
+<section>
+  <div class="wrap">
+    <div class="sh rv"><span class="ey">Для кого</span><h2>Врачи, студенты, клиники</h2></div>
+    <div class="per-g">
+      <div class="per rv"><span class="pi">🩺</span><h4>Терапевт</h4><p>Протоколы по 15+ нозологиям. Алгоритмы лечения прямо на приёме. Экономия 2–3 часов в день.</p></div>
+      <div class="per rv rv-1"><span class="pi">🔪</span><h4>Хирург</h4><p>Пред- и послеоперационное ведение. Сравнение ESC/AHA и РФ. Онко-протоколы NCCN.</p></div>
+      <div class="per rv rv-2"><span class="pi">🎓</span><h4>Студент / Ординатор</h4><p>Конспекты за минуты. Готовые списки литературы. Объяснения от простого к сложному. Тесты.</p></div>
+      <div class="per rv rv-3"><span class="pi">🏥</span><h4>Клиника / Вуз</h4><p>Корпоративные аккаунты. Интеграция с МИС. Образовательный модуль. On-premise.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- OBSIDIAN KNOWLEDGE ARCHITECTURE -->
+<section class="obs-sec" id="obs">
+  <div class="wrap">
+    <div class="sh rv"><span class="ey" style="color:#C4B5FD;">Архитектура знаний</span><h2 style="color:#fff;">Obsidian как фундамент</h2><p style="color:var(--slate-light);">Три роли Obsidian в экосистеме Vitalis: внутренняя база команды, публичная документация и источник данных для AI.</p></div>
+    <div class="obs-g">
+      <div class="rv">
+        <div class="obs-flow">
+          <div class="obs-node">
+            <div class="obs-dot vault">📓</div>
+            <div class="obs-info"><h4>Obsidian Vault</h4><p>Markdown-файлы клинических протоколов, заметки, связи между нозологиями. Граф знаний с перекрёстными ссылками.</p><span class="tag tag-ob">Obsidian</span></div>
+          </div>
+          <div class="obs-node">
+            <div class="obs-dot rag">⚡</div>
+            <div class="obs-info"><h4>Векторизация → FAISS</h4><p>.md из vault → LangChain → эмбеддинги → FAISS-индекс. Семантический поиск по всей базе.</p><span class="tag tag-lc">LangChain</span></div>
+          </div>
+          <div class="obs-node">
+            <div class="obs-dot ai">🧠</div>
+            <div class="obs-info"><h4>GigaChat RAG</h4><p>При запросе врача — релевантные фрагменты из vault подаются как контекст в GigaChat. Точные ответы с источниками.</p><span class="tag tag-gc">GigaChat</span></div>
+          </div>
+          <div class="obs-node">
+            <div class="obs-dot pub">🌐</div>
+            <div class="obs-info"><h4>Obsidian Publish</h4><p>Публичная документация продукта, API-справочник, гайды для врачей — из того же vault через Obsidian Publish.</p><span class="tag tag-em">Publish</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="obs-cards rv rv-1">
+        <div class="obs-card">
+          <div class="oc-head"><h4>Внутренняя база команды</h4><span class="oc-tag tag-ob" style="background:rgba(124,58,237,0.15);color:#C4B5FD;">Vault</span></div>
+          <p>Единый источник истины для разработчиков, медицинских экспертов и контент-менеджеров.</p>
+          <ul><li>Архитектурные решения (ADR)</li><li>Протоколы ревью медицинского контента</li><li>Граф связей между нозологиями</li><li>Заметки по API и интеграциям</li></ul>
+        </div>
+        <div class="obs-card">
+          <div class="oc-head"><h4>Источник данных для RAG</h4><span class="oc-tag" style="background:rgba(245,158,11,0.15);color:#FCD34D;">Pipeline</span></div>
+          <p>Markdown-формат Obsidian идеально ложится на пайплайн LangChain.</p>
+          <ul><li>vault/*.md → чанкинг → эмбеддинги</li><li>FAISS-индекс обновляется при git push</li><li>Метаданные YAML → фильтрация по нозологии</li><li>Версионирование через Git</li></ul>
+        </div>
+        <div class="obs-card">
+          <div class="oc-head"><h4>Публичная документация</h4><span class="oc-tag" style="background:rgba(16,185,129,0.15);color:#6EE7B7;">Publish</span></div>
+          <p>Один vault — два выхода: AI-пайплайн и человекочитаемые доки.</p>
+          <ul><li>API-справочник для разработчиков</li><li>Гайды для врачей по работе с платформой</li><li>Changelog и дорожная карта</li><li>Автоматическая публикация при обновлении</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOURCES -->
+<section>
+  <div class="wrap">
+    <div class="sh rv"><span class="ey">Источники знаний</span><h2>Только проверенные источники</h2></div>
+    <div class="src-g">
+      <div class="src-c rv"><b>PubMed</b><span>Крупнейшая база публикаций NIH</span></div>
+      <div class="src-c rv rv-1"><b>Medscape</b><span>Клинические новости и протоколы</span></div>
+      <div class="src-c rv rv-1"><b>Mayo Clinic</b><span>Экспертные руководства</span></div>
+      <div class="src-c rv rv-2"><b>Нац. клин. рекомендации</b><span>Минздрав РФ</span></div>
+      <div class="src-c rv rv-2"><b>Cochrane Library</b><span>Систематические обзоры</span></div>
+      <div class="src-c rv rv-3"><b>ESC / AHA / NCCN</b><span>Международные протоколы</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="sh rv" style="text-align:center;margin-left:auto;margin-right:auto;"><span class="ey">Тарифы</span><h2>От студента до сети клиник</h2></div>
+    <div class="pr-g">
+      <div class="prc rv">
+        <div class="pr-tier">Студент</div>
+        <div class="pr-name">Бесплатный</div>
+        <div class="pr-price">0 ₽</div>
+        <p class="pr-desc">Для студентов медвузов и знакомства с платформой</p>
+        <ul class="pr-ft"><li>10 запросов в день</li><li>РФ-протоколы</li><li>Генерация конспектов</li><li>Ссылки на источники</li></ul>
+        <a href="#demo" class="btn btn-gh">Начать бесплатно</a>
+      </div>
+      <div class="prc feat rv rv-1">
+        <div class="pr-tier">Врач</div>
+        <div class="pr-name">Профессиональный</div>
+        <div class="pr-price">990 ₽<small> / мес</small></div>
+        <p class="pr-desc">Для практикующих врачей и ординаторов</p>
+        <ul class="pr-ft"><li>Безлимитные запросы</li><li>РФ + международные протоколы</li><li>Генерация статей</li><li>Расширенный PubMed</li><li>История запросов</li></ul>
+        <a href="#demo" class="btn btn-em">Выбрать план</a>
+      </div>
+      <div class="prc rv rv-2">
+        <div class="pr-tier">Клиника</div>
+        <div class="pr-name">Полный доступ</div>
+        <div class="pr-price">По запросу</div>
+        <p class="pr-desc">Для больниц и медицинских учреждений</p>
+        <ul class="pr-ft"><li>Неограниченно врачей</li><li>Интеграция с МИС</li><li>API-доступ</li><li>Персональный менеджер</li><li>SLA 99.5%</li></ul>
+        <a href="#demo" class="btn btn-dk">Связаться</a>
+      </div>
+      <div class="prc rv rv-3">
+        <div class="pr-tier">Enterprise</div>
+        <div class="pr-name">Сеть / Вуз</div>
+        <div class="pr-price">Индивидуально</div>
+        <p class="pr-desc">Для сетей клиник, вузов и региональных систем</p>
+        <ul class="pr-ft"><li>Мультифилиальный доступ</li><li>On-premise развёртывание</li><li>Кастомные протоколы</li><li>Образовательный модуль</li><li>Поддержка 24/7</li></ul>
+        <a href="#demo" class="btn btn-dk">Обсудить</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section class="rm-sec" id="roadmap">
+  <div class="wrap">
+    <div class="sh rv"><span class="ey" style="color:#6EE7B7;">Дорожная карта</span><h2 style="color:#fff;">Развитие платформы</h2></div>
+    <div class="rm-tl rv">
+      <div class="rm-i done"><div class="rm-d"></div><div class="rm-dt">Q1 2026</div><h4>GigaChat + RAG + Obsidian Vault</h4><p>Карточки по РФ-протоколам. Векторизация vault через LangChain + FAISS. 15 нозологий.</p></div>
+      <div class="rm-i done"><div class="rm-d"></div><div class="rm-dt">Q2 2026</div><h4>Claude + MediSynapse-модули</h4><p>Международные протоколы. Генерация статей, агрегация источников, поиск по PubMed.</p></div>
+      <div class="rm-i now"><div class="rm-d"></div><div class="rm-dt">Q3 2026 · Сейчас</div><h4>Микросервисы + Obsidian Publish</h4><p>Масштабируемая инфраструктура. Публичная документация. Интеграция с МИС.</p></div>
+      <div class="rm-i fut"><div class="rm-d"></div><div class="rm-dt">Q4 2026</div><h4>Образовательный модуль</h4><p>Тесты для ординаторов, адаптивная сложность, трекинг прогресса, интеграция с вузами.</p></div>
+      <div class="rm-i fut"><div class="rm-d"></div><div class="rm-dt">Q1 2027</div><h4>Онко-модуль + мобильное приложение</h4><p>NCCN/ESMO-протоколы. Нативное приложение для iOS/Android.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section>
+  <div class="wrap">
+    <div class="sh rv" style="text-align:center;margin-left:auto;margin-right:auto;"><span class="ey">Безопасность</span><h2>Полное соответствие требованиям</h2></div>
+    <div class="tr-g">
+      <div class="tr-i rv"><span class="tii">🇷🇺</span><p>Серверы в РФ</p><span>Локализация 152-ФЗ</span></div>
+      <div class="tr-i rv rv-1"><span class="tii">🔒</span><p>Обезличивание</p><span>Claude без доступа к ПД</span></div>
+      <div class="tr-i rv rv-2"><span class="tii">📎</span><p>Первоисточники</p><span>Ссылки в каждом ответе</span></div>
+      <div class="tr-i rv rv-3"><span class="tii">👨‍⚕️</span><p>Врач решает</p><span>AI только помогает</span></div>
+    </div>
+    <div class="disc rv">⚠️ <span><b>Важно:</b> Vitalis предоставляет справочную информацию и не заменяет консультацию врача. Сервис не ставит диагнозы и не назначает лечение. В неотложных состояниях обращайтесь за экстренной медицинской помощью.</span></div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap" style="max-width:800px;">
+    <div class="sh rv"><span class="ey">FAQ</span><h2>Частые вопросы</h2></div>
+    <div class="faq-i rv"><button class="faq-q">Vitalis может поставить диагноз пациенту?<span class="plus">+</span></button><div class="faq-an"><p>Нет. Vitalis предоставляет справочную информацию и не заменяет консультацию врача. Окончательное клиническое решение всегда за врачом.</p></div></div>
+    <div class="faq-i rv"><button class="faq-q">Как обеспечивается соответствие 152-ФЗ?<span class="plus">+</span></button><div class="faq-an"><p>Все данные пациентов хранятся и обрабатываются на серверах в РФ через GigaChat. Claude получает только обезличенную клиническую задачу, без персональных данных.</p></div></div>
+    <div class="faq-i rv"><button class="faq-q">Зачем Obsidian в архитектуре?<span class="plus">+</span></button><div class="faq-an"><p>Obsidian vault — единый источник медицинских знаний. Markdown-файлы протоколов версионируются через Git, автоматически векторизуются для RAG-поиска и публикуются как документация через Obsidian Publish.</p></div></div>
+    <div class="faq-i rv"><button class="faq-q">Подходит ли для студентов младших курсов?<span class="plus">+</span></button><div class="faq-an"><p>Да. Vitalis адаптирует сложность ответов. Уточните «объясни простыми словами» или «дай развёрнутый ответ с патофизиологией».</p></div></div>
+    <div class="faq-i rv"><button class="faq-q">Какие языки поддерживает платформа?<span class="plus">+</span></button><div class="faq-an"><p>Русский и английский. Поиск мультиязычный — находит как российские рекомендации, так и международные публикации.</p></div></div>
+    <div class="faq-i rv"><button class="faq-q">Можно ли развернуть on-premise?<span class="plus">+</span></button><div class="faq-an"><p>Да, для тарифов «Клиника» и «Enterprise» доступно развёртывание на серверах заказчика с полным контролем данных.</p></div></div>
+    <div class="faq-i rv"><button class="faq-q">Как обеспечивается конфиденциальность?<span class="plus">+</span></button><div class="faq-an"><p>Vitalis не сохраняет ПД пациентов. Рекомендуем не вводить ФИО и идентифицирующие данные. Все запросы обрабатываются анонимно.</p></div></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-sec" id="demo">
+  <div class="wrap">
+    <div class="rv"><span class="ey" style="color:#6EE7B7;">Начать</span><h2>Попробуйте Vitalis</h2><p>Бесплатный доступ для студентов. Демонстрация для клиник. Без привязки карты.</p></div>
+    <div class="fi rv rv-1">
+      <div id="vF">
+        <div class="fg"><label>Имя</label><input type="text" id="vn" placeholder="Как к вам обращаться"><div class="err">Укажите имя</div></div>
+        <div class="fg"><label>Email</label><input type="email" id="ve" placeholder="you@clinic.ru"><div class="err">Укажите корректный email</div></div>
+        <div class="fg"><label>Кто вы</label><select id="vr"><option value="">Выберите</option><option>Студент</option><option>Ординатор</option><option>Практикующий врач</option><option>Руководитель клиники</option><option>Представитель вуза</option><option>Другое</option></select><div class="err">Выберите роль</div></div>
+        <div class="fg"><label>Интересующий тариф</label><select id="vt"><option value="">Выберите</option><option>Бесплатный (студент)</option><option>Профессиональный (врач)</option><option>Клиника</option><option>Enterprise</option><option>Не определились</option></select></div>
+        <div class="fg"><label>Комментарий <span style="color:var(--slate);font-weight:400">(необязательно)</span></label><textarea id="vm" placeholder="Какие протоколы или нозологии интересуют?"></textarea></div>
+        <button class="btn btn-em" style="width:100%" onclick="vS()">Отправить заявку</button>
+      </div>
+      <div class="fok" id="vO"><div class="okc">✓</div><h3>Заявка отправлена</h3><p>Свяжемся в течение рабочего дня.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="ft-g">
+      <div><div class="ft-logo"><span class="lm"><svg viewBox="0 0 18 18" fill="none"><path d="M4 14L9 4L14 14" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="14" r="1.5" fill="#10B981"/></svg></span>Vitalis</div><p style="font-size:12.5px;color:var(--slate);max-width:220px;">AI-платформа клинических протоколов. РФ + мир. 152-ФЗ.</p></div>
+      <div><h5>Платформа</h5><ul><li><a href="#cap">Возможности</a></li><li><a href="#how">Как работает</a></li><li><a href="#card">Карточка протокола</a></li><li><a href="#obs">Архитектура знаний</a></li></ul></div>
+      <div><h5>Для кого</h5><ul><li><a href="#">Врачи</a></li><li><a href="#">Студенты</a></li><li><a href="#">Клиники</a></li><li><a href="#pricing">Тарифы</a></li></ul></div>
+      <div><h5>Информация</h5><ul><li><a href="#faq">FAQ</a></li><li><a href="#">Конфиденциальность</a></li><li><a href="#">152-ФЗ</a></li><li><a href="#">Контакты</a></li></ul></div>
+    </div>
+    <div class="ft-bot"><span>© 2026 Vitalis. Все права защищены.</span><span>⚠️ AI-ассистент не заменяет клиническое суждение врача.</span></div>
+  </div>
+</footer>
+<button class="btt" id="btt" aria-label="Наверх">↑</button>
+
+<script>
+document.getElementById('burger').onclick=()=>document.getElementById('mm').classList.add('open');
+document.getElementById('mmc').onclick=()=>document.getElementById('mm').classList.remove('open');
+document.querySelectorAll('.ml').forEach(a=>a.onclick=()=>document.getElementById('mm').classList.remove('open'));
+
+// Tabs + intl animation
+let ia=false;
+document.querySelectorAll('.pt-b').forEach(t=>{t.onclick=()=>{
+  document.querySelectorAll('.pt-b').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('pane-'+t.dataset.tab).classList.add('active');
+  if(t.dataset.tab==='intl'&&!ia){ia=true;
+    const s=document.getElementById('sa');
+    setTimeout(()=>{s.classList.add('done');s.querySelector('span').textContent='Анализ завершён · 3 источника';},1200);
+    setTimeout(()=>document.getElementById('c1').classList.add('show'),1600);
+    setTimeout(()=>document.getElementById('c2').classList.add('show'),1900);
+    setTimeout(()=>document.getElementById('db').classList.add('show'),2200);
+    setTimeout(()=>document.getElementById('p1').classList.add('show'),2500);
+    setTimeout(()=>document.getElementById('p2').classList.add('show'),2700);
+    setTimeout(()=>document.getElementById('p3').classList.add('show'),2900);
+  }
+};});
+
+// Algo expand
+document.querySelectorAll('[data-expand]').forEach(s=>{s.onclick=()=>{
+  const w=s.classList.contains('exp');
+  document.querySelectorAll('.as').forEach(x=>x.classList.remove('exp'));
+  if(!w)s.classList.add('exp');
+};});
+
+// Reveal
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');io.unobserve(e.target);}});},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+// BTT
+const btt=document.getElementById('btt');
+addEventListener('scroll',()=>{btt.classList.toggle('show',scrollY>500);},{passive:true});
+btt.onclick=()=>scrollTo({top:0,behavior:'smooth'});
+
+// Header CTA
+const hc=document.getElementById('hcta');
+addEventListener('scroll',()=>{hc.style.display=scrollY>400?'inline-flex':'none';},{passive:true});
+
+// FAQ
+document.querySelectorAll('.faq-q').forEach(b=>{b.onclick=()=>{
+  const i=b.parentElement,a=i.querySelector('.faq-an'),o=i.classList.contains('open');
+  document.querySelectorAll('.faq-i.open').forEach(x=>{x.classList.remove('open');x.querySelector('.faq-an').style.maxHeight=null;});
+  if(!o){i.classList.add('open');a.style.maxHeight=a.scrollHeight+'px';}
+};});
+
+// Form
+function vS(){let ok=true;
+[{id:'vn',t:v=>v.trim().length>0},{id:'ve',t:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},{id:'vr',t:v=>v!==''}].forEach(f=>{
+const el=document.getElementById(f.id),g=el.closest('.fg');
+if(!f.t(el.value)){g.classList.add('he');ok=false;}else g.classList.remove('he');});
+if(ok){document.getElementById('vF').style.display='none';document.getElementById('vO').style.display='block';}}
+
+if(matchMedia('(prefers-reduced-motion:reduce)').matches)document.querySelectorAll('.rv').forEach(e=>e.classList.add('vis'));
+</script>
+</body>
+</html>
