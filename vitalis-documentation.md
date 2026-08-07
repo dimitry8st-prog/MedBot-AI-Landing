@@ -1,6 +1,13 @@
 # Vitalis — Техническая документация лендинга
 
-## Версия: Unified v1.0 | Дата: Август 2026
+## Версия: Unified v1.1 | Дата: 7 августа 2026
+
+Связанные документы:
+
+- `README.md` — быстрый старт и структура репозитория
+- `MedBot_AI_Handover.md` — project overview, prompt engineering, метрики и критерии пилота
+
+> **Актуализация провайдеров (v1.1):** в runtime международный контур реализован через **DeepSeek** (`backend/app/llm/deepseek.py`). На лендинге (`public/index.html`) и в исторических разделах этого документа ещё может встречаться имя **Claude** — это наследие позиционирования; при синхронизации маркетинга и кода ориентироваться на DeepSeek.
 
 ---
 
@@ -42,7 +49,7 @@ MediSynapse-функции не потеряны — они повысили с�
 | Вторичный текст | Slate | #64748B | Описания, подписи |
 | Светлый фон | Ice | #F0F9FF | Чередующиеся секции |
 | GigaChat / ядро | Blue | #3B82F6 | Шаг «Д» в карточке, шаг 1 |
-| Claude / усилитель | Purple | #A855F7 | Вкладка «Международные», шаг «Р» |
+| DeepSeek / усилитель (на лендинге ещё «Claude») | Purple | #A855F7 | Вкладка «Международные», шаг «Р» |
 | Obsidian | Obsidian Purple | #7C3AED | Блок архитектуры знаний |
 | Предупреждения | Amber | #F59E0B | Дисклеймер, дорожная карта «в работе» |
 | Ошибки | Coral | #EF4444 | Валидация формы, иконки проблем |
@@ -198,7 +205,7 @@ MediSynapse-функции не потеряны — они повысили с�
 | Период | Этап | Статус | Визуал |
 |---|---|---|---|
 | Q1 2026 | GigaChat + RAG + Obsidian Vault | Завершено | Зелёная точка |
-| Q2 2026 | Claude + MediSynapse-модули | Завершено | Зелёная точка |
+| Q2 2026 | Международный контур (DeepSeek) + MediSynapse-модули | Завершено | Зелёная точка |
 | Q3 2026 | Микросервисы + Obsidian Publish | В работе | Пульсирующая жёлтая точка |
 | Q4 2026 | Образовательный модуль | Планируется | Серая точка |
 | Q1 2027 | Онко-модуль + мобильное приложение | Планируется | Серая точка |
@@ -227,12 +234,39 @@ MediSynapse-функции не потеряны — они повысили с�
 
 ## 4. Техническая реализация
 
-### Размер и зависимости
+### 4.1. Runtime-архитектура (актуально)
 
-- Один HTML-файл, ~42 КБ
+| Слой | Путь | Роль |
+|---|---|---|
+| Лендинг | `public/index.html` | Маркетинг, форма заявок |
+| Кабинет | `web/app.html` | Клинический запрос, карточка ответа |
+| Node | `server/index.js` | Статика, `POST /api/leads`, прокси `/api/ai` → Python |
+| AI API | `backend/app/` | `GET /health`, `POST /ask`, RAG, веб-поиск, LLM |
+| Vault | `vault/*.md` | Локальные протоколы для FAISS |
+
+Поток запроса в кабинете:
+
+1. Браузер → `POST /api/ai/ask` (Node)
+2. Node проксирует на FastAPI `POST /ask`
+3. Классификация намерения → RAG (`vault/`) → веб-поиск → контур `rf` / `intl` / `both`
+4. Ответ очищается от имён провайдеров и отдаётся как карточка с вкладками
+
+Режимы LLM: `LLM_MODE=mock` (без ключей) или `live` (GigaChat + DeepSeek). Веб-поиск по умолчанию: DuckDuckGo; опционально Serper / Tavily.
+
+**Типичная ошибка:** `connect ECONNREFUSED 127.0.0.1:8000` — не запущен uvicorn. Статус кабинета `база undefined · веб undefined` означает, что `/api/ai/health` не получил ответ Python API.
+
+Проверка здоровья:
+
+- Node: `GET /api/health`
+- Python напрямую: `GET http://127.0.0.1:8000/health`
+- Через прокси: `GET /api/ai/health` → поля `vault_chunks`, `llm_mode`, `web_search`
+
+### 4.2. Лендинг: размер и зависимости
+
+- Основной лендинг в проде: `public/index.html` (исторический монофайл: `vitalis-unified.html`)
 - Внешние зависимости: Google Fonts (3 шрифта)
-- JavaScript: ~80 строк (меню, табы, анимация, reveal, форма)
-- Без фреймворков, без сборки
+- JavaScript: меню, табы, анимация, reveal, форма
+- Без фреймворков, без сборки фронтенда
 
 ### CSS-архитектура
 
@@ -250,7 +284,7 @@ MediSynapse-функции не потеряны — они повысили с�
 5. **Back-to-top:** scrollY > 500 → classList.toggle('show')
 6. **Header CTA:** scrollY > 400 → display toggle
 7. **FAQ аккордеон:** classList + maxHeight
-8. **Форма:** клиентская валидация (имя, email regex, select)
+8. **Форма:** клиентская валидация (имя, email regex, select) + `POST /api/leads`
 9. **Reduced motion:** prefers-reduced-motion → все .rv получают .vis
 
 ### Accessibility
@@ -264,63 +298,47 @@ MediSynapse-функции не потеряны — они повысили с�
 
 ## 5. Рекомендации по развитию
 
-### Приоритет 1 — Ближайшие шаги
+Детальные критерии пилота, метрики и риски — в `MedBot_AI_Handover.md` (§3–§6).
 
-- **Бэкенд формы:** подключить отправку заявок (email-уведомление или CRM: Bitrix24, amoCRM)
-- **Аналитика:** Яндекс.Метрика + цели на CTA, табы карточки, скролл-глубину
-- **Custdev тарифов:** валидировать цену 990 ₽/мес через интервью с врачами
-- **Видео-демо:** заменить мокап в hero на запись реального интерфейса (когда готов)
+### Приоритет 1 — Demo Beta (стабильный MVP)
 
-### Приоритет 2 — Улучшения UX
+- Один понятный сценарий запуска Node + Python (оба порта)
+- Синхронизация маркетинга с кодом: Claude → DeepSeek на лендинге
+- Корректный offline-статус в кабинете (без `undefined`)
+- Smoke-тесты `/health` и `/ask`
+- Яндекс.Метрика + цели на CTA и форму
 
-- **Toggle «для врачей / для IT»** в блоке архитектуры знаний
-- **Lottie-анимация** в hero вместо статичной схемы
-- **Социальное доказательство:** счётчик пользователей, логотипы клиник/вузов
-- **A/B тест:** hero с видео vs hero со схемой
+### Приоритет 2 — Closed Beta
 
-### Приоритет 3 — Масштабирование
+- `LLM_MODE=live` + ключи; экспертный набор 24–30 сценариев
+- Фильтр ПДн до внешнего вызова; сужение CORS
+- Structured JSON-ответ и привязка утверждений к источникам
+- Custdev тарифа 990 ₽/мес; видео-демо реального кабинета в hero
 
-- **React-компоненты:** перевести в Hero.tsx, ProtocolCard.tsx, Pricing.tsx и т.д.
-- **i18n:** английская версия для международных конференций
-- **CMS:** headless CMS (Strapi, Directus) для управления контентом FAQ и кейсов
-- **Obsidian Publish:** настроить реальный publish для документации
+### Приоритет 3 — Product Beta / масштаб
+
+- Реестр источников с годом и статусом; enrichment `vault/`
+- Toggle «для врачей / для IT»; i18n; React-компоненты при необходимости
+- Obsidian Publish для публичной документации
 
 ---
 
 ## 6. Файловая структура проекта
 
 ```
-vitalis/
-├── vitalis-unified.html          ← Текущий лендинг (единый файл)
-├── vitalis-documentation.md      ← Этот документ
-│
-├── [Будущая структура]
-├── src/
-│   ├── components/
-│   │   ├── Hero.tsx
-│   │   ├── Capabilities.tsx
-│   │   ├── HowItWorks.tsx
-│   │   ├── ProtocolCard.tsx
-│   │   ├── Personas.tsx
-│   │   ├── ObsidianArchitecture.tsx
-│   │   ├── Sources.tsx
-│   │   ├── Pricing.tsx
-│   │   ├── Roadmap.tsx
-│   │   ├── TrustSafety.tsx
-│   │   ├── FAQ.tsx
-│   │   └── CTA.tsx
-│   ├── styles/
-│   │   └── tokens.css            ← CSS-переменные
-│   └── App.tsx
-├── obsidian-vault/
-│   ├── protocols/                ← .md файлы протоколов
-│   ├── team/                     ← Внутренняя документация
-│   └── publish/                  ← Публичные доки
-├── package.json
-├── tailwind.config.js
-└── vite.config.ts
+MedBot-AI-Landing/
+├── public/index.html             ← лендинг (отдаётся Node)
+├── web/app.html                  ← кабинет врача
+├── server/                       ← Express: статика, leads, proxy /api/ai
+├── backend/app/                  ← FastAPI: ask, RAG, GigaChat, DeepSeek
+├── vault/                        ← markdown-протоколы для RAG
+├── .env.example
+├── package.json                  ← npm start → Node :3000
+├── MedBot_AI_Handover.md         ← handover: промпты, метрики, пилот
+├── vitalis-documentation.md      ← этот документ
+└── vitalis-unified.html          ← архивный монофайл лендинга
 ```
 
 ---
 
-*Документ создан: Август 2026. Версия лендинга: Unified v1.0.*
+*Документ создан: Август 2026. Обновлён: 7 августа 2026 (v1.1 — runtime, DeepSeek, handover).*

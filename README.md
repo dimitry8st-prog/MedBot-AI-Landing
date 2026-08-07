@@ -1,6 +1,7 @@
 # Vitalis — там где жизнь встречается с вечностью
 
-**Автор:** Степанов Д.А.
+**Автор:** Степанов Д.А.  
+**Репозиторий:** https://github.com/dimitry8st-prog/MedBot-AI-Landing
 
 ---
 
@@ -8,7 +9,7 @@
 
 Vitalis — это AI-помощник для врача. Он помогает быстро разобраться в клиническом вопросе: что проверить, как лечить, чем российские рекомендации отличаются от международных — и сразу показывает, откуда взяты данные.
 
-Это не «просто поиск в интернете». Сначала система смотрит во внутреннюю базу знаний (протоколы в Obsidian / vault), потом проверяет актуальность через веб. Ответы строятся со ссылками на источники. Есть два контура: **РФ** (GigaChat, с учётом 152-ФЗ) и **международные** рекомендации (DeepSeek) — вкладки рядом, чтобы удобно сравнивать.
+Это не «просто поиск в интернете». Сначала система смотрит во внутреннюю базу знаний (протоколы в Obsidian / vault), потом проверяет актуальность через веб. Ответы строятся со ссылками на источники. Есть два контура: **РФ** (GigaChat, с учётом 152-ФЗ) и **международные** рекомендации (**DeepSeek** в коде API; на лендинге местами ещё встречается историческое имя Claude) — вкладки рядом, чтобы удобно сравнивать.
 
 Кому это нужно? Практикующему врачу, которому надо за минуты получить выжимку по протоколу, а не листать сотни страниц PDF. И клиникам, которым нужен инструмент поддержки решений (CDSS) в ежедневной работе.
 
@@ -26,12 +27,12 @@ Vitalis — это AI-помощник для врача. Он помогает 
 
 ## Для разработчиков
 
-Лендинг + форма заявок + кабинет врача (MVP).
+Лендинг + форма заявок + кабинет врача (MVP). **Нужны оба сервиса:** Node на `:3000` и Python AI API на `:8000`. Если Python не запущен, кабинет показывает `connect ECONNREFUSED 127.0.0.1:8000`.
 
 | Часть | Технология | Порт |
 |---|---|---|
-| Лендинг, форма, прокси | Node.js + Express | `3000` |
-| AI / RAG | Python + FastAPI + FAISS | `8000` |
+| Лендинг, форма, прокси `/api/ai` | Node.js + Express | `3000` |
+| AI / RAG / веб-поиск | Python + FastAPI + FAISS | `8000` |
 | База знаний | `vault/` (Obsidian markdown) | — |
 
 ### Быстрый старт
@@ -41,7 +42,19 @@ cp .env.example .env
 npm install && npm start
 ```
 
+В **отдельном** терминале:
+
 ```bash
+cd backend
+py -3.12 -m venv .venv312
+# Windows Git Bash:
+.venv312/Scripts/python -m pip install -r requirements.txt
+.venv312/Scripts/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+PowerShell / cmd:
+
+```bat
 cd backend
 py -3.12 -m venv .venv312
 .venv312\Scripts\activate
@@ -49,11 +62,18 @@ pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-- Лендинг: http://localhost:3000/
-- Кабинет: http://localhost:3000/app
-- API docs: http://localhost:8000/docs
+### Проверка
 
-В `.env` для живых ответов: `LLM_MODE=live`, ключи GigaChat и DeepSeek. Без ключей работает демо-режим (`mock`).
+| URL | Что должно быть |
+|---|---|
+| http://localhost:3000/ | лендинг |
+| http://localhost:3000/app | кабинет врача |
+| http://localhost:3000/api/health | Node health |
+| http://localhost:3000/api/ai/health | прокси → Python health |
+| http://localhost:8000/docs | Swagger FastAPI |
+| http://localhost:8000/health | `vault_chunks`, `llm_mode`, `web_search` |
+
+Без ключей оставьте `LLM_MODE=mock` в `.env`. Для живых ответов: `LLM_MODE=live` и ключи GigaChat / DeepSeek.
 
 ### Форма заявок
 
@@ -62,13 +82,17 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ### Структура
 
 ```
-├── public/index.html      # лендинг
-├── web/app.html           # кабинет
-├── server/                # Node Express
-├── backend/app/           # FastAPI
-├── vault/                 # протоколы + Vitalis_FAQ_Skills.md
+├── public/index.html           # лендинг
+├── web/app.html                # кабинет
+├── server/                     # Node Express (статика, заявки, прокси)
+├── backend/app/                # FastAPI (ask, RAG, LLM)
+├── vault/                      # протоколы + Vitalis_FAQ_Skills.md
 ├── .env.example
-└── vitalis-documentation.md
+├── MedBot_AI_Handover.md       # передача проекта: промпты, метрики, риски
+└── vitalis-documentation.md    # дизайн и блоки лендинга + runtime
 ```
 
-Подробнее по дизайну и блокам лендинга — в `vitalis-documentation.md`.
+### Документация
+
+- Дизайн и блоки лендинга: `vitalis-documentation.md`
+- Передача специалисту (overview, prompt guide, метрики, путь к бете): `MedBot_AI_Handover.md`
